@@ -1,0 +1,5 @@
+menu "Kernel modules"
+
+source "$BR2_EXTERNAL_RV_SDK_PATH/package/modules/example-module-overlay/Config.in"
+
+endmenu

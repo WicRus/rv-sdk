@@ -1,0 +1,53 @@
+/dts-v1/;
+
+/ {
+  description = "FIT Image with U-Boot/OP-TEE/MCU";
+  #address-cells = <1>;
+
+  images {
+    uboot {
+      description = "U-Boot";
+      data = /incbin/("./u-boot-nodtb.bin.gz");
+      type = "standalone";
+      arch = "arm64";
+      os = "U-Boot";
+      compression = "gzip";
+      load = <0x40200000>;
+      hash {
+        algo = "sha256";
+      };
+      digest {
+        value = /incbin/("./u-boot-nodtb.bin.digest");
+        algo = "sha256";
+      };
+    };
+    fdt {
+      description = "U-Boot dtb";
+      data = /incbin/("./u-boot.dtb");
+      type = "flat_dt";
+      arch = "arm64";
+      compression = "none";
+      hash {
+        algo = "sha256";
+      };
+    };
+ITS
+  };
+
+  configurations {
+    default = "conf";
+    conf {
+      description = "uboot-rv1126b-br-ext-demo";
+      rollback-index = <0x0>;
+      firmware = "atf";
+      loadables = "uboot"LTS;
+      fdt = "fdt";
+
+      signature {
+        algo = "sha256,rsa2048";
+        key-name-hint = "dev";
+        sign-images =  "firmware", "loadables", "fdt";
+      };
+    };
+  };
+};

@@ -1,0 +1,99 @@
+#!/bin/bash
+
+if [ "${BASH_SOURCE}" == "$0" ];then
+  echo This script is executed directly...
+  echo Use \"source "$0"\"
+  exit 1
+fi
+
+function __log_i() { echo -e "$@"; }
+function __log_w() { echo -e "\e[0;33m$@\e[0;0m"; }
+function __log_e() { echo -e "\e[0;31m$@\e[0;0m" >&2; }
+
+function __is_uint() {
+  case $1 in '' | *[!0-9]*) return 1;; esac;
+}
+
+function __arr_selector() {
+  local -n __array=$1
+  local -n __result=$2
+  local    __pattern=$3
+  case ${#__array[@]} in
+    0) { return 1; };;
+    1) { __result=${__array[0]}; return 0; };;
+    *) {
+      [ "$__pattern" = ${__array[0]} ] && {
+          __result=${__array[0]}
+        return 0
+      }
+
+      echo "available: "
+      for i in ${!__array[@]}; do
+        echo "  $i. ${__array[$i]}"
+      done
+      echo -n "please select index: "
+
+      local ri
+      while true; do
+        read ri
+
+        __is_uint $ri && [ $ri -lt ${#__array[@]} ] && {
+          __result=${__array[$ri]}
+          return 0
+        }
+        __log_w "index is out of range. try again: "
+      done
+    }
+  esac
+}
+
+function __main() {
+  local BR_OUTPUT=br.out
+  local BR_CCACHE=br.cc
+  local BR_DL=br.dl
+  local BR_PATH=br
+  local BR_CONF_PATH=configs
+
+  local IFS=$'\n'
+  local SCRIPT_PATH=$(realpath ${BASH_SOURCE})
+  local SCRIPT_DIR=$(dirname ${SCRIPT_PATH})
+
+  local CONFIG_LIST=$(ls -1 ${SCRIPT_DIR}/${BR_CONF_PATH}/ | grep "_defconfig$" | sed "s/_defconfig$//")
+  local CONFIG_ARRAY=($(sort <<< $CONFIG_LIST))
+  local CONFIG_ARRAY_SHORT=($(grep -- "$1" <<< $CONFIG_LIST | sort))
+
+  local BR_CFG
+
+  if [[ "$1" =~ ^[[:digit:]]+$ ]] && [ "$1" -lt ${#CONFIG_ARRAY[@]} ]; then
+    BR_CFG=${CONFIG_ARRAY["$1"]}
+    echo "Selected #""$1" $BR_CFG
+  elif __arr_selector CONFIG_ARRAY_SHORT BR_CFG "$1"; then
+    __log_i "  Selected: ""$BR_CFG"
+  else
+    __log_e "  no matches found"
+    return 1
+  fi
+
+  export BR_DIR="${SCRIPT_DIR}/${BR_PATH}"
+  export BR_CONFIG="${BR_CFG}"
+  export BR_OUTPUT_DIR="${SCRIPT_DIR}/${BR_OUTPUT}/${BR_CONFIG}"
+  export BR2_DL_DIR="${SCRIPT_DIR}/${BR_DL}"
+  export BR2_CCACHE_DIR="${SCRIPT_DIR}/${BR_CCACHE}"
+
+  echo "Export custom environment:"
+  echo "  BR_DIR:         ${BR_DIR}"
+  echo "  BR_CONFIG:      ${BR_CONFIG}"
+  echo "  BR_OUTPUT_DIR:  ${BR_OUTPUT_DIR}"
+  echo "Export Buildroot environment:"
+  echo "  BR2_DL_DIR:     ${BR2_DL_DIR}"
+  echo "  BR2_CCACHE_DIR: ${BR2_CCACHE_DIR}"
+
+  make BR2_EXTERNAL="${SCRIPT_DIR}" O="${BR_OUTPUT_DIR}" -C "${BR_DIR}" "${BR_CONFIG}_defconfig"
+}
+
+if [ -z "${BASH_SOURCE}" ];then
+  __log_w "Not in bash, if u get bugz switch to bash"
+fi
+
+__main "$@"
+

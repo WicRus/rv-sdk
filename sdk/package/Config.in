@@ -1,0 +1,2 @@
+source "$BR2_EXTERNAL_RV_SDK_PATH/package/pkgs/Config.in"
+source "$BR2_EXTERNAL_RV_SDK_PATH/package/modules/Config.in"

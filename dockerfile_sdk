@@ -1,0 +1,30 @@
+FROM ubuntu:24.04
+
+ARG USER_ID=1000
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN sed -i -E 's/# (deb-src.*main.*)/\1/g' /etc/apt/sources.list \
+ && apt-get update -y \
+ && apt-get upgrade -y \
+ && apt-get install --no-install-recommends -y \
+    adduser sudo locales ca-certificates bash-completion \
+    make cmake flex bison build-essential \
+    python3 python-is-python3 perl \
+    git cvs mercurial subversion \
+    file wget curl cpio unzip rsync bc swig \
+    libssl-dev libncurses-dev graphviz \
+    less time \
+    adb \
+ && deluser  --remove-home ubuntu \
+ && addgroup --gid $USER_ID dgroup \
+ && adduser  --gecos "duser" --uid $USER_ID --ingroup dgroup --home /home/duser --disabled-password duser \
+ && usermod  -a -G sudo duser \
+ && echo "duser ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/duser \
+ && rm -rf /var/lib/apt/lists/* \
+ && locale-gen en_US.UTF-8 \
+ && git config --global user.name "duser" \
+ && git config --global user.email "duser@ddomain.docker" \
+ && cp ~/.gitconfig /home/duser/ && chown $USER_ID:$USER_ID /home/duser/.gitconfig
+
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8' TERM=screen
+USER duser

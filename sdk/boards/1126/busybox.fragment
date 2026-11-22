@@ -1,0 +1,12 @@
+# busybox debug settings
+
+# Busybox Settings
+# CONFIG_DESKTOP is not set
+
+# Networking Utilities
+# CONFIG_FEATURE_IPV6 is not set
+CONFIG_UDHCPD=y
+CONFIG_DHCPD_LEASES_FILE="/tmp/leases"
+
+# Process Utilities
+CONFIG_PSTREE=y

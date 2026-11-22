@@ -1,0 +1,30 @@
+################################################################################
+#
+# rockchip-rkbin
+#
+################################################################################
+
+ROCKCHIP_RKBIN_EXT_VERSION = 3e288fe814e059dd06833495f845cab04ac20a5c
+ROCKCHIP_RKBIN_EXT_SITE = https://github.com/rockchip-linux/rkbin.git
+ROCKCHIP_RKBIN_EXT_SITE_METHOD = git
+ROCKCHIP_RKBIN_EXT_LICENSE = PROPRIETARY
+ROCKCHIP_RKBIN_EXT_LICENSE_FILES = LICENSE
+
+ROCKCHIP_RKBIN_EXT_INSTALL_IMAGES = YES
+ROCKCHIP_RKBIN_EXT_INSTALL_TARGET = NO
+
+ROCKCHIP_RKBIN_EXT_BL31_FILENAME = $(call qstrip,$(BR2_PACKAGE_ROCKCHIP_RKBIN_EXT_BL31_FILENAME))
+ROCKCHIP_RKBIN_EXT_TPL_FILENAME = $(call qstrip,$(BR2_PACKAGE_ROCKCHIP_RKBIN_EXT_TPL_FILENAME))
+ROCKCHIP_RKBIN_EXT_TEE_FILENAME = $(call qstrip,$(BR2_PACKAGE_ROCKCHIP_RKBIN_EXT_TEE_FILENAME))
+
+define ROCKCHIP_RKBIN_EXT_INSTALL_IMAGES_CMDS
+	$(foreach f, \
+		$(ROCKCHIP_RKBIN_EXT_BL31_FILENAME) \
+		$(ROCKCHIP_RKBIN_EXT_TPL_FILENAME) \
+		$(ROCKCHIP_RKBIN_EXT_TEE_FILENAME) \
+		, \
+		$(INSTALL) -D -m 0644 -t $(BINARIES_DIR) $(@D)/$(f)
+	)
+endef
+
+$(eval $(generic-package))

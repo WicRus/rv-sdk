@@ -1,0 +1,82 @@
+#!/bin/bash
+set -e
+
+#funcs
+function __pushd() { pushd "$@" > /dev/null; }
+function __popd()  { popd > /dev/null; }
+
+function __log_inf() { echo -e "$@"; }
+function __log_wrn() { echo -e "\e[0;33m$@\e[0;0m"; }
+function __log_err() { echo -e "\e[0;31m$@\e[0;0m" >&2; }
+
+function __is_uint() { case $1 in '' | *[!0-9]*) return 1;; esac; }
+
+function __arr_selector() {
+  local -n __array=$1
+  local -n __result=$2
+  local    __pattern=$3
+  case ${#__array[@]} in
+    0) { return 1; };;
+    1) { __result=${__array[0]}; return 0; };;
+    *) {
+      [ "$__pattern" = ${__array[0]} ] && {
+          __result=${__array[0]}
+        return 0
+      }
+      echo "available: "
+      for i in ${!__array[@]}; do
+        echo "  $i. ${__array[$i]}"
+      done
+      echo -n "please select index: "
+
+      local ri
+      while true; do
+        read ri
+
+        __is_uint $ri && [ $ri -lt ${#__array[@]} ] && {
+          __result=${__array[$ri]}
+          return 0
+        }
+        echo -n "index is out of range. try again: "
+      done
+    }
+  esac
+}
+
+# sdk variables
+CUR_PATH=$(dirname $(realpath $0))
+SDK_PATH="$CUR_PATH/sdk"
+
+REPO_URL=https://gerrit.googlesource.com/git-repo
+REPO_PATH="$CUR_PATH/git-repo"
+REPO="$REPO_PATH/repo"
+
+MANIFEST_URL="https://github.com/WicRus/rv-sdk-manifests.git"
+MANIFEST_BRANCH="master"
+MANIFEST="mainline.xml"
+MANIFESTS_DIR="$SDK_PATH/.repo/manifests"
+
+# docker variables
+SDK_DOCKERFILE="$WD_DIR/dockerfile_sdk"
+USER_ID="$(id -u)"
+GRP_ID="$(id -g)"
+D_TAG="sdk-builder_$USER_ID"
+D_IMG="u24"
+W_DIR="/sdk"
+[[ $(ps -o stat= -p $$) =~ "+" ]] && D_Q="-it"
+
+D_MOUNT="-v $SDK_PATH:$W_DIR"
+D_WORKD="-w $W_DIR"
+D_USER="-u $USER_ID:$GRP_ID"
+
+# reconfigure previously defined variables if possible
+RE_CFG="$( dirname -- "$( readlink -f -- "$0"; )"; )"/"$( dirname -- "$BASH_SOURCE"; )"/re.cfg.sh
+[[ -f "$RE_CFG" ]] && . "$RE_CFG" || :
+
+# define docker run|exec flags after reconfigure
+D_FLAGS="\
+  $D_Q --rm \
+  $D_MOUNT \
+  $D_WORKD \
+  $D_USER
+"

@@ -1,0 +1,6 @@
+menu "rv br ext demo packages"
+
+source "$BR2_EXTERNAL_RV_SDK_PATH/package/pkgs/test/Config.in"
+source "$BR2_EXTERNAL_RV_SDK_PATH/package/pkgs/rockchip-rkbin-ext/Config.in"
+
+endmenu

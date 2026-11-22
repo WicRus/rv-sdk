@@ -1,0 +1,2 @@
+
+$(eval $(generic-package))

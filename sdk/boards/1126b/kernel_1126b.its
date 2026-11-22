@@ -1,0 +1,48 @@
+/dts-v1/;
+/ {
+    description = "U-Boot FIT source file for arm";
+
+    images {
+      fdt {
+          data = /incbin/("kernel.dtb");
+          type = "flat_dt";
+          arch = "arm64";
+          compression = "none";
+          load = <0xffffff00>;
+
+          hash {
+              algo = "sha256";
+          };
+      };
+      kernel {
+          data = /incbin/("Image.gz");
+          type = "kernel";
+          arch = "arm64";
+          os = "linux";
+          compression = "gzip";
+          entry = <0xffffff01>;
+          load = <0xffffff01>;
+
+          hash {
+              algo = "sha256";
+          };
+      };
+    };
+
+    configurations {
+        default = "conf";
+
+        conf {
+            rollback-index = <0x00>;
+            fdt = "fdt";
+            kernel = "kernel";
+
+            signature {
+                algo = "sha256,rsa2048";
+                padding = "pss";
+                key-name-hint = "dev";
+                sign-images = "fdt", "kernel";
+            };
+        };
+    };
+};

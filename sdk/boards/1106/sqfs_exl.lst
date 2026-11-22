@@ -1,0 +1,6 @@
+usr/include
+usr/share/aclocal
+usr/lib/pkgconfig
+usr/share/pkgconfig
+usr/lib/cmake
+usr/share/cmake

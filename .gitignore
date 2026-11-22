@@ -1,0 +1,12 @@
+# main
+TRACE_FILE
+git-repo
+
+# sdk
+sdk/br
+sdk/br.dl
+sdk/br.cc
+sdk/br.out
+sdk/app
+sdk/prebuilts
+sdk/.repo

@@ -1,0 +1,4 @@
+config BR2_PACKAGE_TEST_PKG
+  bool "test-pkg"
+  help
+    test package plz ignore
